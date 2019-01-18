@@ -58,3 +58,19 @@ def merge_data(df_raw_data, df__raw_metadata, tax_rank='genus',
         df_data = df_data[(df_data.mislabeled == 'n') | (df_data['mislabeled'].isnull())]
 
     return df_data
+
+def df_normalize(df, along_row = True):
+    '''
+    :param
+        df: pandas data frame
+        along_row: boolean
+            If True, the normalization is done along the row. Otherwise, along the column
+    :return:
+        pandas data frame
+            normalized version of df
+    '''
+    # The replace(0, 1) is needed to avoid division by zero in case all elements of the row/column are zero
+    if(along_row):
+        return df.div(df.sum(axis=1).replace(0, 1), axis=0)
+    else:
+        return df.div(df.sum(axis=0).replace(0, 1), axis=1)
