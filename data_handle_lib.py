@@ -11,12 +11,13 @@ def read_raw_data(data_path, metadata_path):
     Returns:
         [pd.df of data, pd.df of metadata, pd.df of description]
     '''
-    if (data_path.split('.')[-1] == 'tsv'):
+
+    if data_path.split('.')[-1] == 'tsv':
         df_data = pd.read_csv(data_path, sep='\t')
     else:
-        df_data = pf.read_csv(data_path)
+        df_data = pd.read_csv(data_path)
 
-    if (metadata_path.split('.')[-1] == 'tsv'):
+    if metadata_path.split('.')[-1] == 'tsv':
         df_metadata = pd.read_csv(metadata_path, setp='\t')
     else:
         df_metadata = pd.read_csv(metadata_path)
@@ -27,8 +28,7 @@ def read_raw_data(data_path, metadata_path):
     return [df_data, df_metadata, metadata_descr]
 
 def merge_data(df_raw_data, df_raw_metadata, tax_rank='genus',
-               metadata_useful=['sample_name', 'collection_date', 'common_sample_site', 'host_individual',
-                                'mislabeled'],
+               metadata_useful=['sample_name', 'collection_date', 'common_sample_site', 'host_individual', 'mislabeled'],
                drop_unclassified=True, drop_mislabeled=True, index_time=True):
     '''Function that takes in pandas data frames of data and metadata, cleans them up and returns a merged version of the two,
     indexed over the time since the first sampling (in days)
@@ -47,7 +47,8 @@ def merge_data(df_raw_data, df_raw_metadata, tax_rank='genus',
     Returns:
         pd.df of the data merged with the relevant metadata, also cleaned up
     '''
-    if (metadata_useful):
+
+    if metadata_useful:
         # Only keep useful metadata columns
         df_raw_metadata = df_raw_metadata.loc[:, metadata_useful]
 
@@ -56,7 +57,7 @@ def merge_data(df_raw_data, df_raw_metadata, tax_rank='genus',
     # Change file names to match those in meta_data
         df_raw_data.columns = [col_title.split('.', 1)[0] for col_title in df_raw_data.columns]
     # Drop unclassified samples
-    if (drop_unclassified):
+    if drop_unclassified:
         df_raw_data = df_raw_data.drop(index=(df_raw_data[df_raw_data[tax_rank].str.contains("unclassified")]).index)
 
     # Make the metadata and the data dataframes match and...
@@ -67,7 +68,7 @@ def merge_data(df_raw_data, df_raw_metadata, tax_rank='genus',
     df_data = pd.concat([df_metadata_1, df_data_1], axis=1, sort=False)
 
     # Index the dataframe on time since sampling (in days)
-    if (index_time):
+    if index_time:
         df_data.insert(0, 'sample_name', df_data.index.values)  # to store once the index will be reset
         # Set index to days (in float) since first sampling
         df_data['collection_date'] = pd.to_datetime(df_data['collection_date'])
@@ -79,7 +80,7 @@ def merge_data(df_raw_data, df_raw_metadata, tax_rank='genus',
         df_data = df_data.set_index('days')
 
     # Eliminate mislabeled data
-    if (drop_mislabeled):
+    if drop_mislabeled:
         df_data = df_data[(df_data.mislabeled == 'n') | (df_data['mislabeled'].isnull())]
 
     return df_data
@@ -95,7 +96,7 @@ def df_normalize(df, along_row = True):
         The normalized pandas data frame
     '''
     # The replace(0, 1) is needed to avoid division by zero in case all elements of the row/column are zero
-    if(along_row):
+    if along_row:
         return df.div(df.sum(axis=1).replace(0, 1), axis=0)
     else:
         return df.div(df.sum(axis=0).replace(0, 1), axis=1)
