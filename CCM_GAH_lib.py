@@ -16,7 +16,6 @@ def shadowManifold(X, E, tau=1):
 
     return shadow_M
 
-
 def nearestNeighbours(shadow_M, t, n_neigh):
     '''
     Returns the positions (index) of n-neigh nearest neighbours of x(t) the shadow
@@ -37,7 +36,6 @@ def nearestNeighbours(shadow_M, t, n_neigh):
 
     return [shadow_M[i] for i in np.argsort(distances)[1:n_neigh + 1]]
 
-
 def nearestLeaveOutNeighbours(shadow_M, t, n_neigh):
     '''
     Returns the positions (index) of n-neigh nearest neighbours of x(t) the shadow
@@ -57,14 +55,12 @@ def nearestLeaveOutNeighbours(shadow_M, t, n_neigh):
 
     return [shadow_M[i] for i in np.argsort(distances)[0:n_neigh]]
 
-
 def weights(v_t, neigh):
     distances_neigh, u = np.zeros(len(neigh)), np.zeros(len(neigh))
     for i in range(len(neigh)):
         distances_neigh[i] = dist.euclidean(v_t[0], neigh[i][0])
         u[i] = np.exp(-distances_neigh[i])  # /distances_neigh[0])
     return u / np.sum(u)
-
 
 def generateYApprox(X, Y, E, how_long, tau=1, leaveOut=False):
     '''
