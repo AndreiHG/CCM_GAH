@@ -106,7 +106,7 @@ def single_CCM(df, x_ID, y_ID,
     # Compute the time series length
     L_max = len(x_data)
     L_step = L_step
-    L = np.arange(E * 2 + 1, L_max, L_step)
+    L = np.arange(2*E+1, L_max, L_step)
     if (L[-1] != len(x_data)):
         L = np.append(L, len(x_data))
 
@@ -164,9 +164,14 @@ def CCM_result(x_data, y_data, x_ID, y_ID, x_name, y_name, L,
                               "x_name": [x_name, y_name], "y_name": [y_name, x_name],
                               "spearman_coeff": [spearmanXY[0], spearmanYX[0]],
                               "spearman_coeff_p": [spearmanXY[1], spearmanYX[1]],
-                              "pearson_coeff": [corr_X_xmap_Y[-1], corr_Y_xmap_X[-1]],
-                              "L": [L[-1], L[-1]],
-                              "subject": [subject, subject], "sample_loc": [sample_loc, sample_loc],
-                              "L_step": [L_step, L_step]})
+                              "pearson_coeff": [corr_X_xmap_Y, corr_Y_xmap_X],
+                              "pearson_coeff_last": [corr_X_xmap_Y[-1], corr_Y_xmap_X[-1]],
+                              "L": [L, L],
+                              "L_final": [L[-1], L[-1]],
+                              "L_step": [L_step, L_step],
+                              "subject": [subject, subject],
+                              "sample_loc": [sample_loc, sample_loc],
+                              "E": [E, E]
+                              })
 
     return df_result
