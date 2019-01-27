@@ -59,7 +59,7 @@ def nearestLeaveOutNeighbours(shadow_M, t, n_neigh):
 
     return [shadow_M[i] for i in np.argsort(distances)[0:n_neigh]]
 
-def weights(v_t, neigh):
+def weights (v_t, neigh):
     distances_neigh, u = np.zeros(len(neigh)), np.zeros(len(neigh))
     for i in range(len(neigh)):
         distances_neigh[i] = dist.euclidean(v_t[0], neigh[i][0])
@@ -91,12 +91,12 @@ def generateYApprox(X, Y, E, how_long, tau=1, leaveOut=False):
 
     return Y_tilde
 
-
 def single_CCM(df, x_ID, y_ID,
                L_step=5, E=3, taxonomy="genus",
                print_timeit=False, print_results=False, plot_result=False):
     '''
     '''
+
     how_long_metadata = np.count_nonzero(np.isnan(df.index.values))
     first_day = df.index.values[how_long_metadata]
     subject, sample_loc = df.loc[first_day, "common_sample_site"], df.loc[first_day, "host_individual"]
@@ -114,16 +114,15 @@ def single_CCM(df, x_ID, y_ID,
                       E=E, subject=subject, sample_loc=sample_loc,
                       print_timeit=print_timeit, print_results=print_results, plot_result=plot_result)
 
-
 def CCM_result(x_data, y_data, x_ID, y_ID, x_name, y_name, L,
                E=3, subject="M3", sample_loc="feces",
                print_timeit=False, print_results=False, plot_result=False):
-    '''
+    """
     Args:
         x_data (np.array): the raw data array used to approximate y
         y_data (np.array): the raw data array which we plan to approximate using CCM
     Returns:
-    '''
+    """
     start_time = tm.time()  # in case we want to time the function
 
     corr_X_xmap_Y, corr_Y_xmap_X = [], []
@@ -175,3 +174,19 @@ def CCM_result(x_data, y_data, x_ID, y_ID, x_name, y_name, L,
                               })
 
     return df_result
+
+def CCM_plot(df, x_ID, y_ID):
+
+    df = df[(df["x_ID"] == x_ID) & (df["y_ID"] == y_ID)]
+    pearson_coeff = df["pearson_coeff"].values[0]
+    L = df["L"].values[0]
+    x_name = df["x_name"].values[0]
+    y_name = df["y_name"].values[0]
+
+    plt.figure(figsize=(12, 8))
+    plt.plot(L, pearson_coeff)
+    plt.title("CCM for %s and %s (columns %s and %s, respect.)" % (x_name, y_name, x_ID, y_ID))
+    plt.legend(["%s xmap %s" % (x_name, y_name), "%s xmap %s" % (y_name, x_name)])
+    plt.xlabel("L (length of time series considered)")
+    plt.ylabel("rho (Pearson correlation coeff.)")
+    plt.show()
