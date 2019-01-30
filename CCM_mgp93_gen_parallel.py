@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     # Select data
     subject = "F4"  # or F4
-    sample_site = "L_palm"  # or L_palm, R_palm, Tongue
+    sample_site = "Tongue"  # or feces, L_palm, R_palm, Tongue
 
     # Select data for a certain subject and sample location
     df_data = df_mgp93[((df_mgp93.host_individual == subject) | (df_mgp93['host_individual'].isnull()))
@@ -28,10 +28,8 @@ if __name__ == '__main__':
     first_species = 0  # column index of first species (usually 0)
 
     data_range = df_data.columns.values[df_data.columns.get_loc(first_species):].astype(int)
-    how_many_species = 25
+    how_many_species = 100
     only_most_abundant = True
-
-    print("Testing with %.0f species" %(how_many_species))
 
     # Select only the most abundant
     if (only_most_abundant):
@@ -54,7 +52,7 @@ if __name__ == '__main__':
         {"x_ID": [], "y_ID": [], "x_name": [], "y_name": [], "spearman_coeff": [], "spearman_coeff_p": [],
          "pearson_coeff": [], "pearson_coeff_last": [], "L": [], "L_final": [], "L_step": [],
          "subject": [], "sample_loc": [], "E": []})
-    #df_result.to_csv("mgp93_" + subject + "_" + sample_site + "_CCMed_" + timestr + ".csv")
+    df_result.to_csv("mgp93_" + subject + "_" + sample_site + "_CCMed_parallel_" + timestr + ".csv")
 
     # Do CCM on all possible combinations of the selected species
     # Append to the previously created csv file live, but in chunks
@@ -79,7 +77,7 @@ if __name__ == '__main__':
     ##########
     # Parallel
     ##########
-
+    total_start_time = tm.time()
     # First build the argument list for the parallel computation
     args_parallel = []
     for m in range(len(bacteria_IDs)):
@@ -87,11 +85,13 @@ if __name__ == '__main__':
             # arguments for single_CCM
             # df, x_ID, y_ID, L_step, E, taxonomy,
             # print_timeit, print_results, plot_result):
-            args_parallel.append([df_data_norm, bacteria_IDs[m], bacteria_IDs[n], 20, 7, "genus",
+            args_parallel.append([df_data_norm, bacteria_IDs[m], bacteria_IDs[n], 1, 10, "genus",
                                   False, False, False])
 
-    total_start_time = tm.time()
     with mp.Pool(processes=8) as pool:
-        pool.starmap(ccm.single_CCM, args_parallel)
+        df_result = df_result.append(pool.starmap(ccm.single_CCM, args_parallel))
 
     print("Total time for parallel with %.0f processes was %.2f seconds." % (4, tm.time() - total_start_time))
+
+    df_result.to_csv("mgp93_" + subject + "_" + sample_site + "_CCMed_parallel_" + timestr + ".csv",
+                     header=None, mode="a")
