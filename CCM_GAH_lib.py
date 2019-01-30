@@ -25,7 +25,6 @@ def nearestNeighbours(shadow_M, t, n_neigh):
     Returns the positions (index) of n-neigh nearest neighbours of x(t) the shadow
     manifold shadow_M, in order from closest to farthest.
     '''
-    dist_list = []
     t_0 = shadow_M[0][1]
     if (t - t_0) < 0:
         print("The vector x(t) for your particular choice of time t doesn't exist in the shadow manifold M_X")
@@ -134,9 +133,13 @@ def CCM_result(x_data, y_data, x_ID, y_ID, x_name, y_name, L,
 
         Y_approx = generateYApprox(x_orig, y_orig, E=E, how_long=0)
         corr_Y_xmap_X.append(pearsonr(y_orig[(E - 1):i], Y_approx)[0])
-
         X_approx = generateYApprox(y_orig, x_orig, E=E, how_long=0)
         corr_X_xmap_Y.append(pearsonr(x_orig[(E - 1):], X_approx)[0])
+
+    # If the data in both data sets is 0 then the Pearson correlation is NaN (div by zero)
+    # Replace that with zero correlation
+    corr_X_xmap_Y = np.nan_to_num(corr_X_xmap_Y, copy=False)
+    corr_Y_xmap_X = np.nan_to_num(corr_Y_xmap_X, copy=False)
 
     spearmanXY, spearmanYX = spearmanr(corr_X_xmap_Y, L), spearmanr(corr_Y_xmap_X, L)
 
