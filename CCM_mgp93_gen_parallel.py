@@ -78,6 +78,14 @@ if __name__ == '__main__':
     # Parallel
     ##########
     total_start_time = tm.time()
+    # After each CCM, append to output file (only happens if output file name is provided in the single_CCM function)
+    output_file = "mgp93_" + subject + "_" + sample_site + "_CCMed_parallel_" + timestr + ".csv"
+    df_result = pd.DataFrame({"x_ID": [], "y_ID": [], "x_name": [], "y_name": [],
+                              "spearman_coeff": [], "spearman_coeff_p": [],
+                              "pearson_coeff": [], "pearson_coeff_last": [],
+                              "L": [], "L_final": [], "L_step": [],
+                              "subject": [], "sample_loc": [], "E": []})
+    df_result.to_csv(output_file)
     # First build the argument list for the parallel computation
     args_parallel = []
     for m in range(len(bacteria_IDs)):
@@ -85,13 +93,13 @@ if __name__ == '__main__':
             # arguments for single_CCM
             # df, x_ID, y_ID, L_step, E, taxonomy,
             # print_timeit, print_results, plot_result):
-            args_parallel.append([df_data_norm, bacteria_IDs[m], bacteria_IDs[n], 1, 10, "genus",
-                                  False, False, False])
+            args_parallel.append([df_data_norm, bacteria_IDs[m], bacteria_IDs[n], 1, 5, "genus",
+                                  False, False, False, output_file])
 
-    with mp.Pool(processes=8) as pool:
-        df_result = df_result.append(pool.starmap(ccm.single_CCM, args_parallel))
+    with mp.Pool(processes=6) as pool:
+        pool.starmap(ccm.single_CCM, args_parallel)
 
-    print("Total time for parallel with %.0f processes was %.2f seconds." % (4, tm.time() - total_start_time))
+    print("Total time for parallel with %.0f processes was %.2f seconds." % (6, tm.time() - total_start_time))
 
-    df_result.to_csv("mgp93_" + subject + "_" + sample_site + "_CCMed_parallel_" + timestr + ".csv",
-                     header=None, mode="a")
+    #df_result.to_csv("mgp93_" + subject + "_" + sample_site + "_CCMed_parallel_" + timestr + ".csv",
+    #                 header=None, mode="a")
