@@ -25,7 +25,6 @@ def nearestNeighbours(shadow_M, t, n_neigh):
     Returns the positions (index) of n-neigh nearest neighbours of x(t) the shadow
     manifold shadow_M, in order from closest to farthest.
     '''
-    dist_list = []
     t_0 = shadow_M[0][1]
     if (t - t_0) < 0:
         print("The vector x(t) for your particular choice of time t doesn't exist in the shadow manifold M_X")
@@ -93,7 +92,8 @@ def generateYApprox(X, Y, E, how_long, tau=1, leaveOut=False):
 
 def single_CCM(df, x_ID, y_ID,
                L_step=5, E=3, taxonomy="genus",
-               print_timeit=False, print_results=False, plot_result=False):
+               print_timeit=False, print_results=False, plot_result=False,
+               output_file = ""):
     '''
     '''
 
@@ -107,12 +107,16 @@ def single_CCM(df, x_ID, y_ID,
     L_max = len(x_data)
     L_step = L_step
     L = np.arange(2*E+1, L_max, L_step)
-    if (L[-1] != len(x_data)):
+    if L[-1] != len(x_data):
         L = np.append(L, len(x_data))
 
-    return CCM_result(x_data, y_data, x_ID, y_ID, x_name, y_name, L,
+    result = CCM_result(x_data, y_data, x_ID, y_ID, x_name, y_name, L,
                       E=E, subject=subject, sample_loc=sample_loc,
                       print_timeit=print_timeit, print_results=print_results, plot_result=plot_result)
+    if output_file:
+        result.to_csv(output_file, header=None, mode="a")
+
+    return result
 
 def CCM_result(x_data, y_data, x_ID, y_ID, x_name, y_name, L,
                E=3, subject="M3", sample_loc="feces",
@@ -134,21 +138,25 @@ def CCM_result(x_data, y_data, x_ID, y_ID, x_name, y_name, L,
 
         Y_approx = generateYApprox(x_orig, y_orig, E=E, how_long=0)
         corr_Y_xmap_X.append(pearsonr(y_orig[(E - 1):i], Y_approx)[0])
-
         X_approx = generateYApprox(y_orig, x_orig, E=E, how_long=0)
         corr_X_xmap_Y.append(pearsonr(x_orig[(E - 1):], X_approx)[0])
 
+    # If the data in both data sets is 0 then the Pearson correlation is NaN (div by zero)
+    # Replace that with zero correlation
+    corr_X_xmap_Y = np.nan_to_num(corr_X_xmap_Y, copy=False)
+    corr_Y_xmap_X = np.nan_to_num(corr_Y_xmap_X, copy=False)
+
     spearmanXY, spearmanYX = spearmanr(corr_X_xmap_Y, L), spearmanr(corr_Y_xmap_X, L)
 
-    if (print_timeit):
+    if print_timeit:
         end_time = tm.time()
         print("Loop for IDs (%s, %s) took %.3f seconds." % (x_ID, y_ID, end_time - start_time))
 
-    if (print_results):
+    if print_results:
         print("%s xmap %s: spearman_coeff = %.4f" % (x_name, y_name, spearmanXY[0]))
         print("%s xmap %s: spearman_coeff = %.4f" % (y_name, x_name, spearmanYX[0]))
 
-    if (plot_result):
+    if plot_result:
         fig = plt.figure(figsize=(12, 8))
         plt.plot(L, corr_Y_xmap_X, 'g')
         plt.plot(L, corr_X_xmap_Y, 'b')
