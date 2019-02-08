@@ -16,8 +16,8 @@ if __name__ == '__main__':
     df_mgp93 = dh.merge_data(raw_data, raw_metadata)
 
     # Select data
-    subject = "F4"  # or F4
-    sample_site = "Tongue"  # or feces, L_palm, R_palm, Tongue
+    subject = "F4"  # M3 or F4
+    sample_site = "feces"  # feces, L_palm, R_palm, Tongue
 
     # Select data for a certain subject and sample location
     df_data = df_mgp93[((df_mgp93.host_individual == subject) | (df_mgp93['host_individual'].isnull()))
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     first_species = 0  # column index of first species (usually 0)
 
     data_range = df_data.columns.values[df_data.columns.get_loc(first_species):].astype(int)
-    how_many_species = 100
+    how_many_species = 5
     only_most_abundant = True
 
     # Select only the most abundant
@@ -93,7 +93,7 @@ if __name__ == '__main__':
             # arguments for single_CCM
             # df, x_ID, y_ID, L_step, E, taxonomy,
             # print_timeit, print_results, plot_result):
-            args_parallel.append([df_data_norm, bacteria_IDs[m], bacteria_IDs[n], 1, 5, "genus",
+            args_parallel.append([df_data_norm, bacteria_IDs[m], bacteria_IDs[n], 1, 10, "genus",
                                   False, False, False, output_file])
 
     with mp.Pool(processes=6) as pool:
