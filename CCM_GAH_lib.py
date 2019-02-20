@@ -33,6 +33,7 @@ def nearestNeighbours(shadow_M, t, n_neigh):
     distances = np.zeros(len(shadow_M))
     for i in range(len(shadow_M)):
         distances[i] = dist.euclidean(shadow_M[i][0], v)
+    # Used for debuggin/checking, at some point...
     # distances = np.array(dist_list)
     # print(dist_list)
     # print(np.argsort(distances)[1:n_neigh+1]+t_0, np.sort(distances)[1:n_neigh+1])
@@ -44,7 +45,6 @@ def nearestLeaveOutNeighbours(shadow_M, t, n_neigh):
     Returns the positions (index) of n-neigh nearest neighbours of x(t) the shadow
     manifold shadow_M, in order from closest to farthest.
     '''
-    dist_list = []
     t_0 = shadow_M[0][1]
     if (t - t_0) < 0:
         print("The vector x(t) for your particular choice of time t doesn't exist in the shadow manifold M_X")
@@ -65,18 +65,16 @@ def weights (v_t, neigh):
         u[i] = np.exp(-distances_neigh[i])  # /distances_neigh[0])
     return u / np.sum(u)
 
-def generateYApprox(X, Y, E, how_long, tau=1, leaveOut=False):
+def generateYApprox(X, Y, E, tau=1, leaveOut=False):
     '''
-    Generates the time series Y_tilde (or Y_approximative), cross mapped using time series X,
-    truncated to how_long many elements.
+    Generates the time series Y_tilde (or Y_approximative), cross mapped using time series X.
     '''
 
     shadow_M_X = shadowManifold(X, E, tau)
-    neigh, weigh = [], []
 
     Y_tilde = np.zeros(len(shadow_M_X))
     Y_neigh_index = np.zeros(E + 1, dtype=int)
-    t_0 = shadow_M_X[0][1]  # I think...
+
     for i in range(len(shadow_M_X)):
         if (leaveOut):
             neigh = nearestLeaveOutNeighbours(shadow_M_X, shadow_M_X[i][1], E + 1)
@@ -136,9 +134,9 @@ def CCM_result(x_data, y_data, x_ID, y_ID, x_name, y_name, L,
         x_orig = x_data[:i]
         y_orig = y_data[:i]
 
-        Y_approx = generateYApprox(x_orig, y_orig, E=E, how_long=0)
+        Y_approx = generateYApprox(x_orig, y_orig, E=E)
         corr_Y_xmap_X.append(pearsonr(y_orig[(E - 1):i], Y_approx)[0])
-        X_approx = generateYApprox(y_orig, x_orig, E=E, how_long=0)
+        X_approx = generateYApprox(y_orig, x_orig, E=E)
         corr_X_xmap_Y.append(pearsonr(x_orig[(E - 1):], X_approx)[0])
 
     # If the data in both data sets is 0 then the Pearson correlation is NaN (div by zero)
@@ -157,7 +155,7 @@ def CCM_result(x_data, y_data, x_ID, y_ID, x_name, y_name, L,
         print("%s xmap %s: spearman_coeff = %.4f" % (y_name, x_name, spearmanYX[0]))
 
     if plot_result:
-        fig = plt.figure(figsize=(12, 8))
+        plt.figure(figsize=(12, 8))
         plt.plot(L, corr_Y_xmap_X, 'g')
         plt.plot(L, corr_X_xmap_Y, 'b')
         plt.title("CCM for %s and %s (columns %s and %s, respect.)" % (x_name, y_name, x_ID, y_ID))
