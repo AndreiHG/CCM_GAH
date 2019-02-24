@@ -60,4 +60,11 @@ target/
 .#*
 
 # Notebook Checkpoints
-.ipynb_checkpoints/
+.ipynb_checkpoints
+
+# data files
+*.csv
+
+# Pycharm files
+env/
+venv/
